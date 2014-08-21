@@ -12,7 +12,7 @@
 }
 
 .navbar-header {
-    padding: 0 15px;
+    padding: 0 30px;
 }
 
 a.dropdown-toggle {
@@ -28,7 +28,7 @@ div.board {
     background-color: #48CFAD;
     padding: 15px;
     cursor: pointer;
-    height: 100px;
+    height: 90px;
     margin: 15px 0;
 }
 

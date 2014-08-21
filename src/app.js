@@ -11,10 +11,7 @@
     
     // configure the routes
     app.config(['$routeProvider', '$locationProvider', function ($routeProvider, $locationProvider) {
-        $routeProvider.when('/', {             
-            templateUrl: 'boardviewTemplate',
-            controller: "OrgListCtrl"
-        });
+        $routeProvider.when('/', {template: '<div org-list></div>'}); // load orgList direvative 
         
         $locationProvider.html5Mode(true);
     }]);
@@ -61,50 +58,78 @@
         };
         
         $scope.createOrg = function () {
-            alert(2);
+            var modalInstance = $modal.open({
+                templateUrl: 'createOrgModalTemplate',
+                controller: 'createOrgModalCtrl',
+                size: 'sm'
+            });
+
+            modalInstance.result.then(function (board) {});
         };
     }]);
     
-    app.controller('BoardDropdownCtrl', ['$scope', '$rootScope', function ($scope, $rootScope) {
-        $scope.boards = [];
-        $rootScope.$storage.orgs.forEach(function(org) {
-            org.boards.forEach(function (board) {
-                $scope.boards.push({
-                    id: board.id,
-                    name: board.name,
-                    orgId: org.id,
-                    orgName: org.name
-                }); 
-            });
-        });
-    }]);
+    
+    app.directive('boardDropdown', function () {
+        return {
+            restrict: 'A',
+            templateUrl: 'boardDropdownTemplate',
+            controller: ['$scope', '$rootScope', function ($scope, $rootScope) {
+                function resetScope_ () {
+                    $scope.boards = [];
+                    $rootScope.$storage.orgs.forEach(function(org) {
+                        org.boards.forEach(function (board) {
+                            $scope.boards.push({
+                                id: board.id,
+                                name: board.name,
+                                orgId: org.id,
+                                orgName: org.name
+                            }); 
+                        });
+                    });
+                };
+                
+                $rootScope.$watch('$storage.orgs', resetScope_, true);
+            }]
+        };
+    });
 
     // The organization controller that contains the details of the organizations 
-    app.controller('OrgListCtrl', ['$scope', '$rootScope', function ($scope, $rootScope) {
-        // seperate orgs from default boards
-        $scope.orgs = [],
-        $scope.defaultBoards = [];
+    app.directive('orgList', function () {
+        return {
+            restrict: 'A',
+            templateUrl: 'boardviewTemplate',
+            controller: ['$scope', '$rootScope', function ($scope, $rootScope) {
+                // seperate orgs from default boards
+                function resetScope_ () {
+                    $scope.data = {
+                        orgs: [],
+                        defaultBoards: []
+                    };
 
-        $rootScope.$storage.orgs.forEach(function(org) {
-            var boards = [];
-            org.boards.forEach(function (board) {
-                boards.push({
-                    id: board.id,
-                    name: board.name
-                }); 
-            });
-            // if org is not organization then list all the cards on my boards sections 
-            if (!org.isOrganization) {
-                $scope.defaultBoards = boards;
-            } else {
-                $scope.orgs.push({
-                        id: org.id,
-                        name: org.name,
-                        boards: boards
-                });
-            }
-        });
-    }]);
+                    $rootScope.$storage.orgs.forEach(function(org) {
+                        var boards = [];
+                        org.boards.forEach(function (board) {
+                            boards.push({
+                                id: board.id,
+                                name: board.name
+                            }); 
+                        });
+                        // if org is not organization then list all the cards on my boards sections 
+                        if (!org.isOrganization) {
+                            $scope.data.defaultBoards = boards;
+                        } else {
+                            $scope.data.orgs.push({
+                                    id: org.id,
+                                    name: org.name,
+                                    boards: boards
+                            });
+                        }
+                    });
+                };
+                $rootScope.$watch('$storage.orgs', resetScope_, true);
+            }]
+        };
+    });
 
     app.controller('createBoardModalCtrl', ['$scope', '$rootScope', '$modalInstance'
         , function ($scope, $rootScope, $modalInstance) {
@@ -117,10 +142,9 @@
         $scope.ok = function () {
             var close = false;
             $('#createBoardModalName').removeClass('myllo-invalid');
-            $rootScope.$storage.orgs.forEach(function (org) {
-       
-                if (!$scope.data.boardName.length)
+            if (!$scope.data.boardName.length)
                     return $('#createBoardModalName').addClass('myllo-invalid');
+            $rootScope.$storage.orgs.forEach(function (org) {
                 if (org.id === parseInt($scope.data.orgId)) {
                     var maxId = 0, present = false;
                     org.boards.forEach(function (board) {
@@ -144,6 +168,42 @@
             });
             if (close)
                 $modalInstance.close();
+        };
+        
+        $scope.cancel = function () {
+            $modalInstance.dismiss('close');
+        };
+    }]);
+
+    app.controller('createOrgModalCtrl', ['$scope', '$rootScope', '$modalInstance'
+        , function ($scope, $rootScope, $modalInstance) {
+        $scope.orgs = $rootScope.$storage.orgs;
+        $scope.data = {orgName: ""}
+        
+        $scope.ok = function () {
+            var close = false;
+            $('#createOrgModalName').removeClass('myllo-invalid');
+            if (!$scope.data.orgName.length)
+                    return $('#createOrgModalName').addClass('myllo-invalid');
+            var close = true, maxId = 0;
+            $rootScope.$storage.orgs.forEach(function (org) {
+                if (org.name === $scope.data.orgName) {
+                    $('#createOrgModalName').addClass('myllo-invalid');
+                    close = false;
+                } else {
+                    maxId = org.id > maxId ? org.id : maxId;
+                }
+            });
+            
+            if (close) {
+                $rootScope.$storage.orgs.push({
+                    id: ++maxId,
+                    name: $scope.data.orgName,
+                    isOrganization: true,
+                    boards: []
+                });
+                $modalInstance.close();
+            }
         };
         
         $scope.cancel = function () {
