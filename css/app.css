@@ -2,4 +2,41 @@
     Created on : 21 Aug, 2014, 3:24:28 AM
     Author     : Rituparna Kashyap
 */
+.myllo-invalid {
+    border-color: red;
+}
 
+.navbar {
+    margin-bottom: 0px;
+    background-color: #37BC9B;
+}
+
+.navbar-header {
+    padding: 0 30px;
+}
+
+a.dropdown-toggle {
+    font-size: 18px;
+}
+
+div.board {
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    background-color: #FFF;
+    box-shadow: 0 1px 2px rgba(0,0,0,.2);
+    background-color: #48CFAD;
+    padding: 15px;
+    cursor: pointer;
+    height: 90px;
+    margin: 15px 0;
+}
+
+h3.org {
+    padding-left: 15px;
+}
+
+div.board h4 {
+    margin: 0px;
+    color: #FFFFFF;
+}
