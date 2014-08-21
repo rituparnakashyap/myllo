@@ -12,8 +12,9 @@
     // configure the routes
     app.config(['$routeProvider', '$locationProvider', function ($routeProvider, $locationProvider) {
         $routeProvider.when('/', {template: '<div org-list></div>'}); // load orgList direvative 
+        $routeProvider.when('/o/:orgId/b/:boardId', {template: '<div card-list></div>'}); // load cardList direvative 
         
-        $locationProvider.html5Mode(true);
+        //$locationProvider.html5Mode(true);
     }]);
     
     // The mail app controller that stores the app configuration 
